@@ -1,88 +1,831 @@
 <!DOCTYPE html>
-<html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <link rel="stylesheet" href="./static/css/styles.css" />
-        <meta
-            http-equiv="Content-Security-Policy"
-            content="default-src * 'unsafe-inline' 'unsafe-eval'"
-        />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>Tauri App</title>
-        <script src="./static/js/main.js"></script>
-    </head>
-    <body>
-        <main class="container">
-            <h1>Welcome to TauriMan</h1>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>跑得快记账</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
 
-            <div class="row">
-                <a
-                    href="https://tauri.app"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <img
-                        src="./assets/tauri.svg"
-                        class="logo tauri"
-                        alt="Tauri logo"
-                    />
-                </a>
-                <a
-                    href="https://pakeplus.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                >
-                    <img
-                        src="https://hk.gh-proxy.org/https://github.com/Sjj1024/PakePlus/blob/main/app-icon.png"
-                        class="logo vanilla"
-                        alt="JavaScript logo"
-                    />
-                </a>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 10px;
+            padding-bottom: env(safe-area-inset-bottom);
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 12px;
+        }
+
+        .header h1 {
+            font-size: 26px;
+            margin-bottom: 4px;
+        }
+
+        .header p {
+            font-size: 14px;
+            opacity: 0.9;
+        }
+
+        .card {
+            background: white;
+            border-radius: 10px;
+            padding: 12px;
+            margin-bottom: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .section-title {
+            font-size: 17px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .player-select {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .player-select button {
+            flex: 1;
+            padding: 14px;
+            border: 2px solid #667eea;
+            background: white;
+            color: #667eea;
+            border-radius: 10px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .player-select button.active {
+            background: #667eea;
+            color: white;
+        }
+
+        .player-inputs {
+            display: grid;
+            gap: 10px;
+        }
+
+        .player-inputs input {
+            padding: 14px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            font-size: 18px;
+            transition: border-color 0.3s;
+        }
+
+        .player-inputs input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:active {
+            transform: scale(0.98);
+        }
+
+        .btn-secondary {
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .btn-danger {
+            background: #ff4757;
+            color: white;
+        }
+
+        .scores-table-wrapper {
+            width: 100%;
+            overflow-x: auto;
+            -webkit-overflow-scrolling: touch;
+        }
+
+        .scores-table {
+            width: 100%;
+            min-width: 400px;
+            border-collapse: collapse;
+            font-size: 15px;
+        }
+
+        .scores-table th {
+            padding: 8px 4px;
+            text-align: center;
+            background: #f8f9fa;
+            color: #666;
+            font-size: 13px;
+            font-weight: 600;
+            white-space: nowrap;
+        }
+
+        .scores-table td {
+            padding: 8px 4px;
+            text-align: center;
+            border-bottom: 1px solid #eee;
+            font-size: 15px;
+            white-space: nowrap;
+        }
+
+        .scores-table .total {
+            background: #f8f9fa;
+            font-weight: 600;
+            color: #667eea;
+        }
+
+        .round-input {
+            display: grid;
+            gap: 8px;
+            margin-bottom: 12px;
+        }
+
+        .round-input-row {
+            display: grid;
+            grid-template-columns: 55px 48px 120px;
+            gap: 6px;
+            align-items: center;
+        }
+
+        .round-input-row .player-name {
+            font-size: 16px;
+            font-weight: 500;
+            color: #333;
+            text-align: left;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .round-input-row .sign-btn {
+            width: 48px;
+            height: 48px;
+            border: none;
+            border-radius: 8px;
+            font-size: 24px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .round-input-row .sign-btn.positive {
+            background: #e74c3c;
+            color: white;
+        }
+
+        .round-input-row .sign-btn.negative {
+            background: #2ecc71;
+            color: white;
+        }
+
+        .round-input-row .score-input {
+            height: 48px;
+            padding: 0 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            font-size: 20px;
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .round-input-row .score-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .round-input-row .score-input.auto-filled {
+            background: #f0f9ff;
+            border-color: #667eea;
+        }
+
+        .round-number {
+            text-align: center;
+            color: #667eea;
+            font-weight: 600;
+            margin-bottom: 12px;
+            font-size: 16px;
+        }
+
+        .history-list {
+            max-height: 200px;
+            overflow-y: auto;
+        }
+
+        .history-item {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .history-item:last-child {
+            border-bottom: none;
+        }
+
+        .history-round {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 15px;
+        }
+
+        .history-scores {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            font-size: 13px;
+        }
+
+        .history-score {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            min-width: 30px;
+        }
+
+        .history-score span:first-child {
+            color: #999;
+            font-size: 12px;
+        }
+
+        .history-score span:last-child {
+            font-weight: 600;
+        }
+
+        .history-score.positive {
+            color: #e74c3c;
+        }
+
+        .history-score.negative {
+            color: #2ecc71;
+        }
+
+        .hidden {
+            display: none;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 30px 20px;
+            color: #999;
+        }
+
+        .empty-state svg {
+            width: 50px;
+            height: 50px;
+            margin-bottom: 10px;
+            opacity: 0.5;
+        }
+
+        .winner-banner {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            padding: 12px;
+            border-radius: 10px;
+            text-align: center;
+            margin-bottom: 12px;
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .actions {
+            display: flex;
+            gap: 10px;
+        }
+
+        .actions .btn {
+            flex: 1;
+        }
+
+        .score-positive {
+            color: #e74c3c;
+            font-weight: 600;
+        }
+
+        .score-negative {
+            color: #2ecc71;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🃏 跑得快记账</h1>
+            <p>开发者：德哥</p>
+        </div>
+
+        <div id="setupScreen">
+            <div class="card">
+                <div class="section-title">选择人数</div>
+                <div class="player-select">
+                    <button id="btn3Players" onclick="selectPlayerCount(3)">3人</button>
+                    <button id="btn4Players" class="active" onclick="selectPlayerCount(4)">4人</button>
+                </div>
             </div>
-            <p>Click to get data</p>
-            <form class="row" id="greet-form">
-                <input id="greet-input" placeholder="Enter a name..." />
-                <button type="submit" id="getdata">GET DATA</button>
-            </form>
-            <div class="functions">
-                <a href="./book.html" target="_self">跳转到book.html</a>
-                <a
-                    href="https://www.baidu.com"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    >跳到百度blank
-                </a>
-                <a
-                    href="https://www.baidu.com"
-                    target="_self"
-                    rel="noopener noreferrer"
-                >
-                    跳到百度self
-                </a>
-                <button onclick="sayHello()">点击我</button>
-                <button onclick="sayHello()">下载文件</button>
-                <button onclick="sayHello()">上传文件</button>
-                <button onclick="sayHello()">访问相机</button>
-                <button onclick="sayHello()">访问麦克风</button>
-                <button onclick="sayHello()">访问相册</button>
-                <button class="btn" onclick="openWechat()">打开微信</button>
-                <button class="btn" onclick="openWechatScan()">
-                    打开扫一扫
-                </button>
-                <button class="btn" onclick="openZhihu()">打开知乎</button>
-                <button onclick="sayHello()">打开抖音</button>
-                <button onclick="sayHello()">用浏览器打开</button>
-                <button>打开知乎</button>
+
+            <div class="card">
+                <div class="section-title">玩家名称</div>
+                <div class="player-inputs" id="playerInputs">
+                    <input type="text" placeholder="玩家1" id="player1">
+                    <input type="text" placeholder="玩家2" id="player2">
+                    <input type="text" placeholder="玩家3" id="player3">
+                    <input type="text" placeholder="玩家4" id="player4">
+                </div>
             </div>
-            <p id="greet-msg"></p>
-            <img src="./static/image/cursor.jpeg" alt="logo" />
-            <video
-                src="https://hk.gh-proxy.org/https://github.com/Sjj1024/PakePlus/blob/main/docs/static/videos/pakeplus.mp4"
-                autoplay
-                controls
-                style="width: 100%; height: 100%"
-            ></video>
-            <audio src="./static/music/yin.mp3" controls></audio>
-        </main>
-    </body>
+
+            <button class="btn btn-primary" onclick="startGame()">开始游戏</button>
+        </div>
+
+        <div id="gameScreen" class="hidden">
+            <div id="winnerBanner" class="winner-banner hidden"></div>
+
+            <div class="card">
+                <div class="section-title">
+                    <span>当前分数</span>
+                    <span id="roundCount">第 1 局</span>
+                </div>
+                <div class="scores-table-wrapper">
+                    <table class="scores-table">
+                        <thead>
+                            <tr>
+                                <th>玩家</th>
+                                <th>本局</th>
+                                <th>总分</th>
+                                <th>结算</th>
+                                <th>累计分</th>
+                                <th>累计额</th>
+                            </tr>
+                        </thead>
+                        <tbody id="scoresTableBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">记录本局分数</div>
+                <div class="round-input" id="roundInput"></div>
+                <div class="actions">
+                    <button class="btn btn-secondary" onclick="undoLastRound()">回退</button>
+                    <button class="btn btn-primary" onclick="submitRound()">提交</button>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="section-title">历史记录</div>
+                <div id="historyList" class="history-list">
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <p>暂无记录</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button class="btn btn-secondary" onclick="resetGame()">重新开始</button>
+                <button class="btn btn-danger" onclick="endGame()">结束游戏</button>
+            </div>
+        </div>
+
+        <div id="resultScreen" class="hidden">
+            <div class="card">
+                <div class="section-title">游戏结果</div>
+                <div id="finalScores"></div>
+            </div>
+            <button class="btn btn-primary" onclick="newGame()">新游戏</button>
+        </div>
+    </div>
+
+    <script>
+        let gameState = {
+            playerCount: 4,
+            players: [],
+            scores: [],
+            totalScores: [],
+            roundHistory: [],
+            currentRound: 1
+        };
+
+        let isCalculating = false;
+
+        function selectPlayerCount(count) {
+            gameState.playerCount = count;
+            document.getElementById('btn3Players').classList.toggle('active', count === 3);
+            document.getElementById('btn4Players').classList.toggle('active', count === 4);
+            updatePlayerInputs();
+        }
+
+        function updatePlayerInputs() {
+            const container = document.getElementById('playerInputs');
+            container.innerHTML = '';
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.placeholder = `玩家${i}`;
+                input.id = `player${i}`;
+                container.appendChild(input);
+            }
+        }
+
+        function startGame() {
+            const players = [];
+            for (let i = 1; i <= gameState.playerCount; i++) {
+                const name = document.getElementById(`player${i}`).value.trim() || `玩家${i}`;
+                players.push(name);
+            }
+
+            gameState.players = players;
+            gameState.scores = new Array(players.length).fill(0);
+            gameState.totalScores = new Array(players.length).fill(0);
+            gameState.roundHistory = [];
+            gameState.currentRound = 1;
+
+            document.getElementById('setupScreen').classList.add('hidden');
+            document.getElementById('gameScreen').classList.remove('hidden');
+
+            updateGameUI();
+            saveGame();
+        }
+
+        function updateGameUI() {
+            updateScoresTable();
+            updateRoundInput();
+            updateHistory();
+            document.getElementById('roundCount').textContent = `第 ${gameState.currentRound} 局`;
+        }
+
+        function updateScoresTable() {
+            const tbody = document.getElementById('scoresTableBody');
+            tbody.innerHTML = '';
+
+            gameState.players.forEach((player, index) => {
+                let lastRoundScore = 0;
+                if (gameState.currentRound > 1 && gameState.roundHistory.length > 0) {
+                    lastRoundScore = gameState.roundHistory[gameState.roundHistory.length - 1].scores[index];
+                }
+                const settlementAmount = gameState.scores[index] * 5;
+                const totalSettlementAmount = gameState.totalScores[index] * 5;
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>${player}</td>
+                    <td class="${lastRoundScore > 0 ? 'score-positive' : lastRoundScore < 0 ? 'score-negative' : ''}">${lastRoundScore > 0 ? '+' : ''}${lastRoundScore}</td>
+                    <td class="total">${gameState.scores[index]}</td>
+                    <td class="${settlementAmount > 0 ? 'score-positive' : settlementAmount < 0 ? 'score-negative' : ''}">${settlementAmount > 0 ? '+' : ''}${settlementAmount}</td>
+                    <td class="total">${gameState.totalScores[index]}</td>
+                    <td class="${totalSettlementAmount > 0 ? 'score-positive' : totalSettlementAmount < 0 ? 'score-negative' : ''}">${totalSettlementAmount > 0 ? '+' : ''}${totalSettlementAmount}</td>
+                `;
+                tbody.appendChild(tr);
+            });
+        }
+
+        function updateRoundInput() {
+            const container = document.getElementById('roundInput');
+            container.innerHTML = '';
+
+            gameState.players.forEach((player, index) => {
+                const row = document.createElement('div');
+                row.className = 'round-input-row';
+
+                const nameSpan = document.createElement('span');
+                nameSpan.className = 'player-name';
+                nameSpan.textContent = player;
+
+                const signBtn = document.createElement('button');
+                signBtn.type = 'button';
+                signBtn.textContent = '-';
+                signBtn.className = 'sign-btn negative';
+                signBtn.id = `sign${index}`;
+                signBtn.onclick = function() {
+                    toggleSign(index);
+                };
+
+                const input = document.createElement('input');
+                input.type = 'number';
+                input.placeholder = '分数';
+                input.id = `score${index}`;
+                input.className = 'score-input';
+                input.step = '1';
+                input.setAttribute('inputmode', 'numeric');
+                input.oninput = function() {
+                    onScoreInput(index);
+                };
+
+                row.appendChild(nameSpan);
+                row.appendChild(signBtn);
+                row.appendChild(input);
+                container.appendChild(row);
+            });
+        }
+
+        function toggleSign(index) {
+            const signBtn = document.getElementById(`sign${index}`);
+            const input = document.getElementById(`score${index}`);
+            
+            if (signBtn.textContent === '+') {
+                signBtn.textContent = '-';
+                signBtn.classList.remove('positive');
+                signBtn.classList.add('negative');
+            } else {
+                signBtn.textContent = '+';
+                signBtn.classList.remove('negative');
+                signBtn.classList.add('positive');
+            }
+            
+            input.classList.remove('auto-filled');
+            calculateRemainingScores();
+        }
+
+        function onScoreInput(changedIndex) {
+            const input = document.getElementById(`score${changedIndex}`);
+            input.classList.remove('auto-filled');
+            calculateRemainingScores();
+        }
+
+        function calculateRemainingScores() {
+            if (isCalculating) return;
+            isCalculating = true;
+            
+            try {
+                const totalPlayers = gameState.players.length;
+                let filledCount = 0;
+                let totalScore = 0;
+                let filledIndices = [];
+                let autoFilledInput = null;
+
+                for (let i = 0; i < totalPlayers; i++) {
+                    const input = document.getElementById(`score${i}`);
+                    if (input.classList.contains('auto-filled')) {
+                        autoFilledInput = input;
+                        continue;
+                    }
+                    
+                    const signBtn = document.getElementById(`sign${i}`);
+                    const value = parseInt(input.value);
+                    
+                    if (!isNaN(value) && input.value !== '' && input.value !== '-') {
+                        const sign = signBtn.textContent === '-' ? -1 : 1;
+                        totalScore += value * sign;
+                        filledCount++;
+                        filledIndices.push(i);
+                    }
+                }
+
+                if (filledCount === totalPlayers - 1) {
+                    const remainingIndex = Array.from({length: totalPlayers}, (_, i) => i).find(i => !filledIndices.includes(i));
+                    
+                    if (remainingIndex !== undefined) {
+                        const remainingScore = -totalScore;
+                        
+                        const input = document.getElementById(`score${remainingIndex}`);
+                        const signBtn = document.getElementById(`sign${remainingIndex}`);
+                        
+                        if (remainingScore !== 0) {
+                            signBtn.textContent = remainingScore > 0 ? '+' : '-';
+                            signBtn.className = 'sign-btn ' + (remainingScore > 0 ? 'positive' : 'negative');
+                            input.value = Math.abs(remainingScore);
+                            input.classList.add('auto-filled');
+                        } else {
+                            input.value = '';
+                            input.classList.remove('auto-filled');
+                        }
+                    }
+                } else if (autoFilledInput) {
+                    autoFilledInput.value = '';
+                    autoFilledInput.classList.remove('auto-filled');
+                }
+            } finally {
+                isCalculating = false;
+            }
+        }
+
+        function submitRound() {
+            const roundScores = [];
+            let isValid = true;
+
+            for (let i = 0; i < gameState.players.length; i++) {
+                const input = document.getElementById(`score${i}`);
+                const signBtn = document.getElementById(`sign${i}`);
+                const value = parseInt(input.value);
+                const sign = signBtn.textContent === '-' ? -1 : 1;
+                if (isNaN(value)) {
+                    isValid = false;
+                    break;
+                }
+                roundScores.push(value * sign);
+            }
+
+            if (!isValid) {
+                alert('请填写所有玩家的得分');
+                return;
+            }
+
+            const totalScore = roundScores.reduce((sum, score) => sum + score, 0);
+            if (totalScore !== 0) {
+                alert('分数总和必须为0，请重新输入！');
+                return;
+            }
+
+            gameState.roundHistory.push({
+                round: gameState.currentRound,
+                scores: [...roundScores]
+            });
+
+            roundScores.forEach((score, index) => {
+                gameState.scores[index] += score;
+                gameState.totalScores[index] += score;
+            });
+
+            gameState.currentRound++;
+            updateGameUI();
+            checkWinner();
+            saveGame();
+
+            const reached100 = gameState.scores.some(score => score >= 100);
+            if (reached100) {
+                setTimeout(() => {
+                    alert('有人达到100分，请结算！');
+                }, 100);
+            }
+        }
+
+        function undoLastRound() {
+            if (gameState.roundHistory.length === 0) {
+                alert('没有可回退的记录');
+                return;
+            }
+
+            if (confirm('确定要回退上一局吗？')) {
+                const lastRound = gameState.roundHistory.pop();
+                lastRound.scores.forEach((score, index) => {
+                    gameState.scores[index] -= score;
+                    gameState.totalScores[index] -= score;
+                });
+                gameState.currentRound--;
+                updateGameUI();
+                saveGame();
+            }
+        }
+
+        function checkWinner() {
+            const maxScore = Math.max(...gameState.scores);
+            const winners = gameState.players.filter((_, index) => gameState.scores[index] === maxScore);
+
+            if (winners.length > 0) {
+                const banner = document.getElementById('winnerBanner');
+                banner.textContent = `🏆 领先者: ${winners.join('、')} (${maxScore}分)`;
+                banner.classList.remove('hidden');
+            }
+        }
+
+        function updateHistory() {
+            const container = document.getElementById('historyList');
+
+            if (gameState.roundHistory.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                        </svg>
+                        <p>暂无记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            container.innerHTML = '';
+            const reversedHistory = [...gameState.roundHistory].reverse();
+
+            reversedHistory.forEach((round, index) => {
+                const item = document.createElement('div');
+                item.className = 'history-item';
+
+                const scoresHtml = round.scores.map((score, i) => `
+                    <div class="history-score ${score > 0 ? 'positive' : score < 0 ? 'negative' : ''}">
+                        <span>${gameState.players[i]}</span>
+                        <span>${score > 0 ? '+' : ''}${score}</span>
+                    </div>
+                `).join('');
+
+                item.innerHTML = `
+                    <span class="history-round">第 ${round.round} 局</span>
+                    <div class="history-scores">${scoresHtml}</div>
+                `;
+                container.appendChild(item);
+            });
+        }
+
+        function resetGame() {
+            if (confirm('确定要重新开始吗？本局分数将被清零，但历史记录和累计分数会保留')) {
+                gameState.scores = new Array(gameState.players.length).fill(0);
+                gameState.currentRound = 1;
+                document.getElementById('winnerBanner').classList.add('hidden');
+                updateGameUI();
+                saveGame();
+            }
+        }
+
+        function endGame() {
+            if (confirm('确定要结束游戏吗？')) {
+                document.getElementById('gameScreen').classList.add('hidden');
+                document.getElementById('resultScreen').classList.remove('hidden');
+                showFinalScores();
+                saveGame();
+            }
+        }
+
+        function showFinalScores() {
+            const container = document.getElementById('finalScores');
+            const sortedPlayers = gameState.players.map((name, index) => ({
+                name,
+                score: gameState.scores[index],
+                settlement: gameState.scores[index] * 5,
+                totalScore: gameState.totalScores[index],
+                totalSettlement: gameState.totalScores[index] * 5
+            })).sort((a, b) => b.score - a.score);
+
+            container.innerHTML = sortedPlayers.map((player, index) => `
+                <div style="display: flex; justify-content: space-between; align-items: center; padding: 12px; border-bottom: 1px solid #eee; ${index === 0 ? 'background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; border-radius: 8px; margin-bottom: 10px;' : ''}">
+                    <div style="flex: 1;">
+                        <div style="font-weight: 600;">${index === 0 ? '👑 ' : ''}${player.name}</div>
+                        <div style="font-size: 13px; opacity: 0.8;">分数: ${player.score} | 累计: ${player.totalScore}</div>
+                    </div>
+                    <div style="font-weight: 600; font-size: 16px;">${player.settlement > 0 ? '+' : ''}${player.settlement}</div>
+                </div>
+            `).join('');
+        }
+
+        function newGame() {
+            document.getElementById('resultScreen').classList.add('hidden');
+            document.getElementById('setupScreen').classList.remove('hidden');
+            gameState = {
+                playerCount: 4,
+                players: [],
+                scores: [],
+                totalScores: [],
+                roundHistory: [],
+                currentRound: 1
+            };
+            updatePlayerInputs();
+            localStorage.removeItem('paodekuai_game');
+        }
+
+        function saveGame() {
+            localStorage.setItem('paodekuai_game', JSON.stringify(gameState));
+        }
+
+        function loadGame() {
+            const saved = localStorage.getItem('paodekuai_game');
+            if (saved) {
+                gameState = JSON.parse(saved);
+                if (gameState.players.length > 0) {
+                    document.getElementById('setupScreen').classList.add('hidden');
+                    document.getElementById('gameScreen').classList.remove('hidden');
+                    updateGameUI();
+                }
+            }
+        }
+
+        loadGame();
+    </script>
+</body>
 </html>
